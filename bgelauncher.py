@@ -224,8 +224,6 @@ class MainWindow(QMainWindow):
 
     def run(self):
         """Run the main method and run BlenderPlayer."""
-        if self.minimi.isChecked():
-            self.showMinimized()
         condition = self.autodetect.isChecked() and self.fullscreen.isChecked()
         dome_mode = str(self.dmode.currentText()).lower().strip()
         ster_mode = str(self.smode.currentText()).lower().strip()
@@ -255,6 +253,8 @@ class MainWindow(QMainWindow):
             str(self.bpp.currentText()) if self.fullscreen.isChecked() else "",
             self.open_game_file(GAME_FILE))).strip()
         print(command_to_run_blenderplayer)
+        if self.minimi.isChecked():
+            self.showMinimized()
         self.process.start(command_to_run_blenderplayer)
 
     def open_game_file(self, game_file):
