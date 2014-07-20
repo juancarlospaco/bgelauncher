@@ -1,8 +1,8 @@
 bgelauncher
 ===========
 
-- Blender Game Engine Launcher.
-- Python 3 + Qt 5, single-file, easy use.
+- Blender Game Engine Launcher with Encrypted ZIP support.
+- Python 3 + Qt 5, single-file, easy use, compilable with Nuitka.
 - 2 UX modes, Simple *(ala Elementary)* or Full *(ala KDE)*
 
 
