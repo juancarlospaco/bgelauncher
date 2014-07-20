@@ -13,24 +13,28 @@ __url__ = 'https://github.com/juancarlospaco/bgelauncher#bgelauncher'
 
 
 # imports
+import codecs
 import sys
 from getopt import getopt
+from os import path
 from subprocess import call, check_output
 from webbrowser import open_new_tab
+from zipfile import ZipFile
 
 from PyQt5.QtCore import QProcess
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QComboBox,
-                             QDialogButtonBox, QGridLayout, QGroupBox,
-                             QHBoxLayout, QLabel, QMainWindow, QMessageBox,
-                             QShortcut, QSpinBox, QVBoxLayout, QWidget)
-
+                             QDialogButtonBox, QFileDialog, QGridLayout,
+                             QGroupBox, QHBoxLayout, QInputDialog, QLabel,
+                             QMainWindow, QMessageBox, QShortcut, QSpinBox,
+                             QVBoxLayout, QWidget)
 
 HELP = """<h3>BGElauncher</h3><b>Blender Game Engine Launcher App !</b><br>
 Version {}, licence {}<ul><li>Python 3 + Qt 5, single-file, No Dependencies</ul>
 DEV: <a href=https://github.com/juancarlospaco>JuanCarlos</a>
 """.format(__version__, __license__)
-BLEND_FILE_TO_RUN = "game.blend"
+GAME_FILE = "game.blend"
+PASSWORD = ""
 
 
 ###############################################################################
@@ -249,17 +253,47 @@ class MainWindow(QMainWindow):
             "0" if condition else str(self.width.currentText()),
             "0" if condition else str(self.heigt.currentText()),
             str(self.bpp.currentText()) if self.fullscreen.isChecked() else "",
-            BLEND_FILE_TO_RUN)).strip()
+            self.open_game_file(GAME_FILE))).strip()
         print(command_to_run_blenderplayer)
         self.process.start(command_to_run_blenderplayer)
+
+    def open_game_file(self, game_file):
+        if not path.isfile(game_file):
+            game_file = str(QFileDialog.getOpenFileName(
+                self, __doc__ + " - Open Blender Game ! ", path.expanduser("~"),
+                "Blender Game Engine file (*.blend)")[0]).strip()
+            if game_file and path.isfile(game_file):
+                return game_file
+            else:
+                return
+        elif game_file.lower().endswith(".blend"):
+            return game_file
+        elif game_file.lower().endswith(".zip"):
+            if not len(PASSWORD):
+                pwd = QInputDialog.getText(self, __doc__, "Game Serial Key")[0]
+            else:
+                pwd = codecs.decode(PASSWORD, "rot13")
+            try:
+                with ZipFile(game_file, "r") as zipy:
+                    zipy.setpassword(str(pwd))
+                    # zipy.setpassword(PASSWORD)
+                    if zipy.testzip():
+                        zipy.extractall()
+                        zipy.close()
+                        return game_file.replace(".zip", ".blend")
+            except Exception as e:
+                print(e)
 
     def _process_finished(self):
         """finished sucessfully"""
         self.showNormal()
         if self.log.isChecked():
-            with open(BLEND_FILE_TO_RUN.replace(".blend", ".log"), "w") as _log:
-                _log.write(self._read_output())
-                _log.write(self._read_errors())
+            try:
+                with open(GAME_FILE.replace(".blend", ".log"), "w") as _log:
+                    _log.write(self._read_output())
+                    _log.write(self._read_errors())
+            except Exception as e:
+                print(e)
 
     def _read_output(self):
         """Read and return output."""
