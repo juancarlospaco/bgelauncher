@@ -1,8 +1,9 @@
 bgelauncher
 ===========
 
-- Blender Game Engine Launcher
+- Blender Game Engine Launcher.
 - Python 3 + Qt 5, single-file, easy use.
+- 2 UX modes, Simple *(ala Elementary)* or Full *(ala KDE)*
 
 
 ![screenshot](https://raw.githubusercontent.com/juancarlospaco/bgelauncher/master/temp.jpg)
