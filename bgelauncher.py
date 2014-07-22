@@ -29,6 +29,7 @@ from PyQt5.QtWidgets import (QApplication, QCheckBox, QComboBox,
                              QMainWindow, QMessageBox, QShortcut, QSpinBox,
                              QVBoxLayout, QWidget)
 
+
 HELP = """<h3>BGElauncher</h3><b>Blender Game Engine Launcher App !</b><br>
 Version {}, licence {}<ul><li>Python 3 + Qt 5, single-file, No Dependencies</ul>
 DEV: <a href=https://github.com/juancarlospaco>JuanCarlos</a>
@@ -122,8 +123,8 @@ class MainWindow(QMainWindow):
         self.width, self.heigt, self.bpp = QComboBox(), QComboBox(), QComboBox()
         resols = ["240", "600", "640", "400", "480", "600", "640", "768", "800",
                   "840", "1024", "1080", "1150", "1280", "1680", "1920", "2048"]
-        self.width.addItems(resols)
-        self.heigt.addItems(resols)
+        self.width.addItems([str(self.get_half_of_resolution()[0])] + resols)
+        self.heigt.addItems([str(self.get_half_of_resolution()[1])] + resols)
         self.bpp.addItems(["32", "16", "8"])
         _container1, _container2 = QWidget(), QWidget()
         _res_lay, _mis_lay = QHBoxLayout(_container1), QHBoxLayout(_container2)
@@ -332,6 +333,14 @@ class MainWindow(QMainWindow):
         window_geometry = self.frameGeometry()
         window_geometry.moveCenter(QApplication.desktop().cursor().pos())
         self.move(window_geometry.topLeft())
+
+    def get_half_of_resolution(self):
+        """Get half of the screen resolution."""
+        mouse_pointer_position = QApplication.desktop().cursor().pos()
+        screen = QApplication.desktop().screenNumber(mouse_pointer_position)
+        widt = QApplication.desktop().screenGeometry(screen).size().width() // 2
+        hei = QApplication.desktop().screenGeometry(screen).size().height() // 2
+        return (widt, hei)
 
     def closeEvent(self, event):
         ' Ask to Quit '
