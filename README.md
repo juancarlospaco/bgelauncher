@@ -1,7 +1,9 @@
 bgelauncher
 ===========
 
-- Blender Game Engine Launcher with Encrypted ZIP support.
+- Blender game engine launcher.
+- Encrypted compressed ZIP support for your BLEND files.
+- Option to embed your game as interactive desktop wallpaper.
 - Python 3 + Qt 5, single-file, easy use, compilable with Nuitka.
 - 2 UX modes, Simple *(ala Elementary)* or Full *(ala KDE)*
 
