@@ -78,7 +78,7 @@ class MainWindow(QMainWindow):
                            lambda: QMessageBox.about(self, __doc__, HELP))
         helpMenu.addSeparator()
         helpMenu.addAction("Keyboard Shortcut", lambda: QMessageBox.information(
-            self, __doc__, "Quit = CTRL+Q"))
+            self, __doc__, "<b>Quit = CTRL+Q"))
         if sys.platform.startswith('linux'):
             helpMenu.addAction("View Source Code",
                                lambda: call('xdg-open ' + __file__, shell=True))
@@ -181,10 +181,12 @@ class MainWindow(QMainWindow):
         self.debug, self.log = QCheckBox("Use Debug"), QCheckBox("Save Logs")
         self.chrt, self.ionice = QCheckBox("Slow CPU"), QCheckBox("Slow HDD")
         self.minimi = QCheckBox("Auto Minimize")
+        self.embeds = QCheckBox("Wallpaper mode")
         self.chrt.setToolTip("Use Low CPU speed priority (Linux only)")
         self.ionice.setToolTip("Use Low HDD speed priority (Linux only)")
         self.debug.setToolTip("Use BGE Verbose logs, ideal for Troubleshooting")
         self.minimi.setToolTip("Automatically Minimize Launcher after launch")
+        self.embeds.setToolTip("Embed Game as an interactive Desktop Wallpaper")
         self.minimi.setChecked(True)
         if not sys.platform.startswith('linux'):
             self.chrt.setDisabled(True)
@@ -193,6 +195,7 @@ class MainWindow(QMainWindow):
         g5vlay.addWidget(self.log)
         g5vlay.addWidget(self.chrt)
         g5vlay.addWidget(self.ionice)
+        g5vlay.addWidget(self.embeds)
         g5vlay.addWidget(self.minimi)
 
         # option to show or hide some widgets on the gui
@@ -230,6 +233,7 @@ class MainWindow(QMainWindow):
         ster_mode = str(self.smode.currentText()).lower().strip()
         dome_angl, dome_tilt = int(self.dangle.value()), int(self.dtilt.value())
         show_deprecated = self.depreca.isChecked()
+        desktop_win_ids = int(QApplication.desktop().winId())
         command_to_run_blenderplayer = " ".join((
             "ionice --ignore --class 3" if self.ionice.isChecked() else "",
             "chrt --verbose --idle 0" if self.chrt.isChecked() else "",
@@ -252,6 +256,7 @@ class MainWindow(QMainWindow):
             "0" if condition else str(self.width.currentText()),
             "0" if condition else str(self.heigt.currentText()),
             str(self.bpp.currentText()) if self.fullscreen.isChecked() else "",
+            "-i {}".format(desktop_win_ids) if self.embeds.isChecked() else "",
             self.open_game_file(GAME_FILE))).strip()
         print(command_to_run_blenderplayer)
         if self.minimi.isChecked():
