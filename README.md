@@ -5,7 +5,7 @@ bgelauncher
 - Whats is it?, its like  [This](https://www.assetstore.unity3d.com/en/#!/content/18438) or [This](https://www.assetstore.unity3d.com/en/#!/content/16624), inspired by  [BlendSling](http://blenderartists.org/forum/showthread.php?271471-BlendSling-0-21b-Launcher-for-BGE-Games-Windows-OS-X-and-Linux-Builds-Available&p=2236285&viewfull=1#post2236285 "BlendSling Launcher")
 - Encrypted compressed ZIP support for your BLEND files.
 - Option to embed your game as interactive desktop wallpaper.
-- Python 3 + Qt 5, single-file, easy use, compilable with Nuitka.
+- Python 3 + Qt 5, single-file, easy use, compilable with Nuitka, GPLv3+ and LGPLv3+ Licences.
 - 2 UX modes, Simple *(ala Elementary)* or Full *(ala KDE)*
 
 
