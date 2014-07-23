@@ -2,6 +2,7 @@ bgelauncher
 ===========
 
 - Blender game engine launcher.
+- Inspired by  [BlendSling](http://blenderartists.org/forum/showthread.php?271471-BlendSling-0-21b-Launcher-for-BGE-Games-Windows-OS-X-and-Linux-Builds-Available&p=2236285&viewfull=1#post2236285 "BlendSling Launcher")
 - Encrypted compressed ZIP support for your BLEND files.
 - Option to embed your game as interactive desktop wallpaper.
 - Python 3 + Qt 5, single-file, easy use, compilable with Nuitka.
