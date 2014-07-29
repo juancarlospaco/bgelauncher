@@ -21,7 +21,7 @@ wget -O - https://raw.githubusercontent.com/juancarlospaco/bgelauncher/master/bg
 # Install permanently on the system:
 
 ```
-sudo apt-get install python3-pyqt5 blender
+sudo apt-get install python3-pyqt5 blender  # OR  sudo yum install python3-qt5  OR  sudo pacman -S python-pyqt5
 sudo wget -O /usr/bin/bgelauncher https://raw.githubusercontent.com/juancarlospaco/bgelauncher/master/bgelauncher.py
 sudo chmod +x /usr/bin/bgelauncher
 bgelauncher
