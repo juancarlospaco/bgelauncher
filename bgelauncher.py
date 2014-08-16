@@ -30,7 +30,7 @@ from PyQt5.QtWidgets import (QApplication, QCheckBox, QComboBox,
                              QDialogButtonBox, QFileDialog, QGridLayout,
                              QGroupBox, QHBoxLayout, QInputDialog, QLabel,
                              QMainWindow, QMessageBox, QShortcut, QSpinBox,
-                             QVBoxLayout, QWidget)
+                             QVBoxLayout, QWidget, QFontDialog)
 
 
 HELP = """<h3>BGElauncher</h3><b>Blender Game Engine Launcher App !</b><br>
