@@ -10,16 +10,19 @@ __license__ = ' GPLv3+ '
 __author__ = ' juancarlos '
 __email__ = ' juancarlospaco@gmail.com '
 __url__ = 'https://github.com/juancarlospaco/bgelauncher#bgelauncher'
+__source__ = ('https://raw.githubusercontent.com/juancarlospaco/'
+              'bgelauncher/master/bgelauncher.py')
 
 
 # imports
 import codecs
 import sys
 from getopt import getopt
-from os import path
+from os import path, nice
 from subprocess import call, check_output
 from webbrowser import open_new_tab
 from zipfile import ZipFile
+from urllib import request
 
 from PyQt5.QtCore import QProcess
 from PyQt5.QtGui import QIcon
@@ -69,7 +72,25 @@ class MainWindow(QMainWindow):
         windowMenu.addAction("Maximize", lambda: self.showMaximized())
         windowMenu.addAction("Restore", lambda: self.showNormal())
         windowMenu.addAction("Center", lambda: self.center())
+        windowMenu.addAction("Top-Left", lambda: self.move(0, 0))
         windowMenu.addAction("To Mouse", lambda: self.move_to_mouse_position())
+        windowMenu.addSeparator()
+        windowMenu.addAction(
+            "Increase size", lambda:
+            self.resize(self.size().width() * 1.4, self.size().height() * 1.4))
+        windowMenu.addAction("Decrease size", lambda: self.resize(
+            self.size().width() // 1.4, self.size().height() // 1.4))
+        windowMenu.addAction("Minimum size", lambda:
+                             self.resize(self.minimumSize()))
+        windowMenu.addAction("Maximum size", lambda:
+                             self.resize(self.maximumSize()))
+        windowMenu.addAction("Horizontal Wide", lambda: self.resize(
+            self.maximumSize().width(), self.minimumSize().height()))
+        windowMenu.addAction("Vertical Tall", lambda: self.resize(
+            self.minimumSize().width(), self.maximumSize().height()))
+        windowMenu.addSeparator()
+        windowMenu.addAction("Set Interface Font...", lambda:
+                             self.setFont(QFontDialog.getFont()[0]))
         helpMenu = self.menuBar().addMenu("&Help")
         helpMenu.addAction("About Qt 5", lambda: QMessageBox.aboutQt(self))
         helpMenu.addAction("About Python 3",
@@ -83,7 +104,9 @@ class MainWindow(QMainWindow):
             helpMenu.addAction("View Source Code",
                                lambda: call('xdg-open ' + __file__, shell=True))
         helpMenu.addAction("View GitHub Repo", lambda: open_new_tab(__url__))
-
+        helpMenu.addAction("Report Bugs", lambda: open_new_tab(
+            'https://github.com/juancarlospaco/bgelauncher/issues?state=open'))
+        helpMenu.addAction("Check Updates", lambda: self.check_for_updates())
         # process
         self.process = QProcess()
         self.process.readyReadStandardOutput.connect(self._read_output)
@@ -315,6 +338,16 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage(" ERROR: BlenderPlayer Failed ! ")
         return str(self.process.readAllStandardError()).strip().lower()
 
+    def check_for_updates(self):
+        """Method to check for updates from Git repo versus this version."""
+        this_version = str(open(__file__).read())
+        last_version = str(request.urlopen(__source__).read().decode("utf8"))
+        if this_version != last_version:
+            m = "Theres new Version available!<br>Download update from the web"
+        else:
+            m = "No new updates!<br>You have the lastest version of this app"
+        return QMessageBox.information(self, __doc__.title(), "<b>" + m)
+
     def _set_guimode(self):
         """Switch between simple and full UX"""
         for widget in (self.group0, self.group2, self.group3, self.group4,
@@ -360,6 +393,7 @@ class MainWindow(QMainWindow):
 
 def main():
     ' Main Loop '
+    nice(19)
     application = QApplication(sys.argv)
     application.setApplicationName(__doc__.strip().lower())
     application.setOrganizationName(__doc__.strip().lower())
