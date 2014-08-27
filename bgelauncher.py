@@ -98,6 +98,8 @@ class MainWindow(QMainWindow):
                              self.setFixedSize(self.size()))
         windowMenu.addAction("Set Interface Font...", lambda:
                              self.setFont(QFontDialog.getFont()[0]))
+        windowMenu.addAction(
+            "Load .qss Skin", lambda: self.setStyleSheet(self.skin()))
         helpMenu = self.menuBar().addMenu("&Help")
         helpMenu.addAction("About Qt 5", lambda: QMessageBox.aboutQt(self))
         helpMenu.addAction("About Python 3",
@@ -363,6 +365,18 @@ class MainWindow(QMainWindow):
         self.resize(self.minimumSize()
                     if self.guimode.currentIndex() else self.maximumSize())
         self.center()
+
+    def skin(self, filename=None):
+        """Open QSS from filename,if no QSS return None,if no filename ask."""
+        if not filename:
+            filename = str(QFileDialog.getOpenFileName(
+                self, __doc__ + "- Open QSS Skin file", path.expanduser("~"),
+                "CSS Cascading Style Sheet for Qt 5 (*.qss);;All (*.*)")[0])
+        if filename and path.isfile(filename):
+            with open(filename, 'r') as file_to_read:
+                text = file_to_read.read().strip()
+        if text:
+            return text
 
     def center(self):
         """Center the Window on the Current Screen,with Multi-Monitor support
