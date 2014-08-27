@@ -6,8 +6,8 @@
 # metadata
 """ BGElauncher """
 __version__ = ' 0.0.1 '
-__license__ = ' GPLv3+ '
-__author__ = ' juancarlos '
+__license__ = ' GPLv3+, LGPLv3+ '
+__author__ = ' JuanCarlos '
 __email__ = ' juancarlospaco@gmail.com '
 __url__ = 'https://github.com/juancarlospaco/bgelauncher#bgelauncher'
 __source__ = ('https://raw.githubusercontent.com/juancarlospaco/'
@@ -26,6 +26,7 @@ from urllib import request
 
 from PyQt5.QtCore import QProcess
 from PyQt5.QtGui import QIcon
+from PyQt5.QtNetwork import QNetworkProxyFactory
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QComboBox,
                              QDialogButtonBox, QFileDialog, QGridLayout,
                              QGroupBox, QHBoxLayout, QInputDialog, QLabel,
@@ -45,7 +46,9 @@ PASSWORD = ""
 
 
 def get_blender_version():
-    """Try to return Blender version if fails return the default docstring."""
+    """Try to return Blender version if fails return the default docstring.
+    >>> isinstance(get_blender_version(), str)
+    True"""
     try:
         ver = str(check_output("blender --version", shell=True).splitlines()[0])
         ver = ver[2:-1].strip().lower()
@@ -58,6 +61,7 @@ def get_blender_version():
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__()
+        QNetworkProxyFactory.setUseSystemConfiguration(True)
         self.statusBar().showMessage(get_blender_version())
         self.setWindowTitle(__doc__.strip().capitalize())
         self.setMinimumSize(400, 200)
@@ -361,22 +365,28 @@ class MainWindow(QMainWindow):
         self.center()
 
     def center(self):
-        """Center the Window on the Current Screen,with Multi-Monitor support"""
+        """Center the Window on the Current Screen,with Multi-Monitor support
+        >>> MainWindow().center()
+        True"""
         window_geometry = self.frameGeometry()
         mousepointer_position = QApplication.desktop().cursor().pos()
         screen = QApplication.desktop().screenNumber(mousepointer_position)
         centerPoint = QApplication.desktop().screenGeometry(screen).center()
         window_geometry.moveCenter(centerPoint)
-        self.move(window_geometry.topLeft())
+        return bool(not self.move(window_geometry.topLeft()))
 
     def move_to_mouse_position(self):
-        """Center the Window on the Current Mouse position"""
+        """Center the Window on the Current Mouse position.
+        >>> MainWindow().move_to_mouse_position()
+        True"""
         window_geometry = self.frameGeometry()
         window_geometry.moveCenter(QApplication.desktop().cursor().pos())
-        self.move(window_geometry.topLeft())
+        return bool(not self.move(window_geometry.topLeft()))
 
     def get_half_of_resolution(self):
-        """Get half of the screen resolution."""
+        """Get half of the screen resolution.
+        >>> isinstance(MainWindow().get_half_of_resolution(), tuple)
+        True"""
         mouse_pointer_position = QApplication.desktop().cursor().pos()
         screen = QApplication.desktop().screenNumber(mouse_pointer_position)
         widt = QApplication.desktop().screenGeometry(screen).size().width() // 2
@@ -403,18 +413,23 @@ def main():
     application.setOrganizationDomain(__doc__.strip())
     application.setWindowIcon(QIcon.fromTheme("blender"))
     try:
-        opts, args = getopt(sys.argv[1:], 'hv', ('version', 'help'))
+        opts, args = getopt(sys.argv[1:], 'hvt', ('version', 'help', 'tests'))
     except:
         pass
     for o, v in opts:
         if o in ('-h', '--help'):
             print(''' Usage:
                   -h, --help        Show help informations and exit.
-                  -v, --version     Show version information and exit.''')
+                  -v, --version     Show version information and exit.
+                  -t, --tests       Run Unit Tests on DocTests if any.''')
             return sys.exit(1)
         elif o in ('-v', '--version'):
             print(__version__)
             return sys.exit(1)
+        elif o in ('-t', '--tests'):
+            from doctest import testmod
+            testmod(verbose=True, report=True, exclude_empty=True)
+            exit(1)
     mainwindow = MainWindow()
     mainwindow.show()
     sys.exit(application.exec_())
