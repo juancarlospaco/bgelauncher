@@ -34,6 +34,13 @@ bgelauncher
 - Blender (Linux package)
 
 
+# Case Studies:
+
+- BGELauncher is being used for **Commercial Games** by [Summersion Studios](http://www.sumersion.com "Summersion Homepage")
+
+[![Summersion Studios Games using BGELauncher and Blender 2.49](http://img.youtube.com/vi/c1WpEIo5g_0/0.jpg)](http://www.youtube.com/watch?v=c1WpEIo5g_0 "Summersion Studios Games using BGELauncher and Blender 2.49")
+
+
 Donate, Charityware :
 ---------------------
 
