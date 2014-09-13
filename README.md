@@ -41,6 +41,11 @@ bgelauncher
 [![Summersion Studios Games using BGELauncher and Blender 2.49](http://img.youtube.com/vi/c1WpEIo5g_0/0.jpg)](http://www.youtube.com/watch?v=c1WpEIo5g_0 "Summersion Studios Games using BGELauncher and Blender 2.49")
 
 
+# BlenderArtists:
+
+- http://blenderartists.org/forum/showthread.php?343620-BGELauncher-Qt5-blenderplayer-launcher&p=2689886&viewfull=1#post2689886
+
+
 Donate, Charityware :
 ---------------------
 
