@@ -312,11 +312,11 @@ class MainWindow(QMainWindow):
 
     def open_game_file(self, game_file):
         """Open a Game file."""
-        if not path.isfile(game_file):
+        if not os.path.isfile(game_file):
             game_file = str(QFileDialog.getOpenFileName(
-                self, __doc__ + " - Open Blender Game! ", path.expanduser("~"),
+                self, __doc__ + " - Open Blender Game! ", os.path.expanduser("~"),
                 "Blender Game Engine file (*.blend)")[0]).strip()
-            if game_file and path.isfile(game_file):
+            if game_file and os.path.isfile(game_file):
                 return game_file
             else:
                 return
@@ -386,9 +386,9 @@ class MainWindow(QMainWindow):
         """Open QSS from filename,if no QSS return None,if no filename ask."""
         if not filename:
             filename = str(QFileDialog.getOpenFileName(
-                self, __doc__ + "- Open QSS Skin file", path.expanduser("~"),
+                self, __doc__ + "- Open QSS Skin", os.path.expanduser("~"),
                 "CSS Cascading Style Sheet for Qt 5 (*.qss);;All (*.*)")[0])
-        if filename and path.isfile(filename):
+        if filename and os.path.isfile(filename):
             with open(filename, 'r') as file_to_read:
                 text = file_to_read.read().strip()
         if text:
