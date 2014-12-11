@@ -4,9 +4,10 @@
 
 
 # metadata
-""" BGElauncher """
+"""BGElauncher."""
+__package__ = "bgelauncher"
 __version__ = ' 0.0.1 '
-__license__ = ' GPLv3+, LGPLv3+ '
+__license__ = ' GPLv3+ LGPLv3+ '
 __author__ = ' JuanCarlos '
 __email__ = ' juancarlospaco@gmail.com '
 __url__ = 'https://github.com/juancarlospaco/bgelauncher#bgelauncher'
@@ -16,26 +17,27 @@ __source__ = ('https://raw.githubusercontent.com/juancarlospaco/'
 
 # imports
 import codecs
+import os
 import sys
+from ctypes import byref, cdll, create_string_buffer
 from getopt import getopt
-from os import path
 from subprocess import call, check_output
+from urllib import request
 from webbrowser import open_new_tab
 from zipfile import ZipFile
-from urllib import request
 
 from PyQt5.QtCore import QProcess
 from PyQt5.QtGui import QIcon
 from PyQt5.QtNetwork import QNetworkProxyFactory
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QComboBox,
-                             QDialogButtonBox, QFileDialog, QGridLayout,
-                             QGroupBox, QHBoxLayout, QInputDialog, QLabel,
-                             QMainWindow, QMessageBox, QShortcut, QSpinBox,
-                             QVBoxLayout, QWidget, QFontDialog)
+                             QDialogButtonBox, QFileDialog, QFontDialog,
+                             QGridLayout, QGroupBox, QHBoxLayout, QInputDialog,
+                             QLabel, QMainWindow, QMessageBox, QShortcut,
+                             QSpinBox, QVBoxLayout, QWidget)
 
 
 HELP = """<h3>BGElauncher</h3><b>Blender Game Engine Launcher App !</b><br>
-Version {}, licence {}<ul><li>Python 3 + Qt 5, single-file, No Dependencies</ul>
+Version {}, licence {}<ul><li>Python3 + Qt5, single-file, No Dependencies</ul>
 DEV: <a href=https://github.com/juancarlospaco>JuanCarlos</a>
 """.format(__version__, __license__)
 GAME_FILE = "game.blend"
@@ -46,12 +48,15 @@ PASSWORD = ""
 
 
 def get_blender_version():
-    """Try to return Blender version if fails return the default docstring.
+    """
+    Try to return Blender version if fails return the default docstring.
+
     >>> isinstance(get_blender_version(), str)
-    True"""
+    True
+    """
     try:
-        ver = str(check_output("blender --version", shell=True).splitlines()[0])
-        ver = ver[2:-1].strip().lower()
+        ver = check_output("blender --version", shell=True).splitlines()[0]
+        ver = str(ver[2:-1]).strip().lower()
     except:
         ver = __doc__.strip().lower()
     finally:
@@ -59,7 +64,11 @@ def get_blender_version():
 
 
 class MainWindow(QMainWindow):
+
+    """Main window of the BGE Launcher."""
+
     def __init__(self, parent=None):
+        """Init class."""
         super(MainWindow, self).__init__()
         QNetworkProxyFactory.setUseSystemConfiguration(True)
         self.statusBar().showMessage(get_blender_version())
@@ -107,11 +116,13 @@ class MainWindow(QMainWindow):
         helpMenu.addAction("About" + __doc__,
                            lambda: QMessageBox.about(self, __doc__, HELP))
         helpMenu.addSeparator()
-        helpMenu.addAction("Keyboard Shortcut", lambda: QMessageBox.information(
-            self, __doc__, "<b>Quit = CTRL+Q"))
+        helpMenu.addAction(
+            "Keyboard Shortcut",
+            lambda: QMessageBox.information(self, __doc__, "<b>Quit = CTRL+Q"))
         if sys.platform.startswith('linux'):
-            helpMenu.addAction("View Source Code",
-                               lambda: call('xdg-open ' + __file__, shell=True))
+            helpMenu.addAction(
+                "View Source Code",
+                lambda: call('xdg-open ' + __file__, shell=True))
         helpMenu.addAction("View GitHub Repo", lambda: open_new_tab(__url__))
         helpMenu.addAction("Report Bugs", lambda: open_new_tab(
             'https://github.com/juancarlospaco/bgelauncher/issues?state=open'))
@@ -124,8 +135,8 @@ class MainWindow(QMainWindow):
         self.process.error.connect(self._process_failed)
 
         # widgets
-        self.group0, self.group1 = QGroupBox("B.G.E."), QGroupBox("Resolutions")
-        self.group2, self.group3 = QGroupBox("AntiAlias"), QGroupBox("3D Views")
+        self.group0, self.group1 = QGroupBox("BGE"), QGroupBox("Resolutions")
+        self.group2, self.group3 = QGroupBox("AntiAlias"), QGroupBox("3DViews")
         self.group4, self.group5 = QGroupBox("Dome mode"), QGroupBox("Misc")
         g0grid, g1vlay = QGridLayout(self.group0), QVBoxLayout(self.group1)
         g5vlay, g4vlay = QVBoxLayout(self.group5), QVBoxLayout(self.group4)
@@ -152,9 +163,11 @@ class MainWindow(QMainWindow):
         # group 1 screen resolutions
         self.fullscreen = QCheckBox("FullScreen")
         self.autodetect = QCheckBox("AutoDetect")
-        self.width, self.heigt, self.bpp = QComboBox(), QComboBox(), QComboBox()
-        resols = ["240", "600", "640", "400", "480", "600", "640", "768", "800",
-                  "840", "1024", "1080", "1150", "1280", "1680", "1920", "2048"]
+        self.width, self.heigt = QComboBox(), QComboBox()
+        self.bpp = QComboBox()
+        resols = [
+            "240", "600", "640", "400", "480", "600", "640", "768", "800",
+            "840", "1024", "1080", "1150", "1280", "1680", "1920", "2048"]
         self.width.addItems([str(self.get_half_of_resolution()[0])] + resols)
         self.heigt.addItems([str(self.get_half_of_resolution()[1])] + resols)
         self.bpp.addItems(["32", "16", "8"])
@@ -216,9 +229,9 @@ class MainWindow(QMainWindow):
         self.embeds = QCheckBox("Wallpaper mode")
         self.chrt.setToolTip("Use Low CPU speed priority (Linux only)")
         self.ionice.setToolTip("Use Low HDD speed priority (Linux only)")
-        self.debug.setToolTip("Use BGE Verbose logs, ideal for Troubleshooting")
+        self.debug.setToolTip("Use BGE Verbose logs,ideal for Troubleshooting")
         self.minimi.setToolTip("Automatically Minimize Launcher after launch")
-        self.embeds.setToolTip("Embed Game as an interactive Desktop Wallpaper")
+        self.embeds.setToolTip("Embed Game as interactive Desktop Wallpaper")
         self.minimi.setChecked(True)
         if not sys.platform.startswith('linux'):
             self.chrt.setDisabled(True)
@@ -235,13 +248,15 @@ class MainWindow(QMainWindow):
         self.guimode.addItems(('Full UX / UI', 'Simple UX / UI'))
         self.guimode.setCurrentIndex(1)
         self._set_guimode()
-        self.guimode.setStyleSheet("""QComboBox{background:transparent;border:0;
+        self.guimode.setStyleSheet(
+            """QComboBox{background:transparent;border:0;
             margin-left:25px;color:gray;text-decoration:underline}""")
         self.guimode.currentIndexChanged.connect(self._set_guimode)
 
         # buttons from bottom to close or proceed
         self.bt = QDialogButtonBox(self)
-        self.bt.setStandardButtons(QDialogButtonBox.Ok | QDialogButtonBox.Close)
+        self.bt.setStandardButtons(QDialogButtonBox.Ok |
+                                   QDialogButtonBox.Close)
         self.bt.rejected.connect(self.close)
         self.bt.accepted.connect(self.run)
 
@@ -263,7 +278,7 @@ class MainWindow(QMainWindow):
         condition = self.autodetect.isChecked() and self.fullscreen.isChecked()
         dome_mode = str(self.dmode.currentText()).lower().strip()
         ster_mode = str(self.smode.currentText()).lower().strip()
-        dome_angl, dome_tilt = int(self.dangle.value()), int(self.dtilt.value())
+        dome_angl, dome_tilt = int(self.dangle.value()), self.dtilt.value()
         show_deprecated = self.depreca.isChecked()
         desktop_win_ids = int(QApplication.desktop().winId())
         command_to_run_blenderplayer = " ".join((
@@ -296,9 +311,10 @@ class MainWindow(QMainWindow):
         self.process.start(command_to_run_blenderplayer)
 
     def open_game_file(self, game_file):
+        """Open a Game file."""
         if not path.isfile(game_file):
             game_file = str(QFileDialog.getOpenFileName(
-                self, __doc__ + " - Open Blender Game ! ", path.expanduser("~"),
+                self, __doc__ + " - Open Blender Game! ", path.expanduser("~"),
                 "Blender Game Engine file (*.blend)")[0]).strip()
             if game_file and path.isfile(game_file):
                 return game_file
@@ -308,7 +324,7 @@ class MainWindow(QMainWindow):
             return game_file
         elif game_file.lower().endswith(".zip"):
             if not len(PASSWORD):
-                pwd = QInputDialog.getText(self, __doc__, "Game Serial Key")[0]
+                pwd = QInputDialog.getText(self, __doc__, "Game SerialKey")[0]
             else:
                 pwd = codecs.decode(PASSWORD, "rot13")
             try:
@@ -323,7 +339,7 @@ class MainWindow(QMainWindow):
                 print(e)
 
     def _process_finished(self):
-        """finished sucessfully"""
+        """Finished sucessfully."""
         self.showNormal()
         if self.log.isChecked():
             try:
@@ -352,13 +368,13 @@ class MainWindow(QMainWindow):
         this_version = str(open(__file__).read())
         last_version = str(request.urlopen(__source__).read().decode("utf8"))
         if this_version != last_version:
-            m = "Theres new Version available!<br>Download update from the web"
+            m = "Theres new Version available<br>Download update from the web"
         else:
             m = "No new updates!<br>You have the lastest version of this app"
         return QMessageBox.information(self, __doc__.title(), "<b>" + m)
 
     def _set_guimode(self):
-        """Switch between simple and full UX"""
+        """Switch between simple and full UX."""
         for widget in (self.group0, self.group2, self.group3, self.group4,
                        self.group5, self.statusBar(), self.menuBar()):
             widget.hide() if self.guimode.currentIndex() else widget.show()
@@ -379,9 +395,12 @@ class MainWindow(QMainWindow):
             return text
 
     def center(self):
-        """Center the Window on the Current Screen,with Multi-Monitor support
+        """
+        Center the Window on the Current Screen,with Multi-Monitor support.
+
         >>> MainWindow().center()
-        True"""
+        True
+        """
         window_geometry = self.frameGeometry()
         mousepointer_position = QApplication.desktop().cursor().pos()
         screen = QApplication.desktop().screenNumber(mousepointer_position)
@@ -390,25 +409,31 @@ class MainWindow(QMainWindow):
         return bool(not self.move(window_geometry.topLeft()))
 
     def move_to_mouse_position(self):
-        """Center the Window on the Current Mouse position.
+        """
+        Center the Window on the Current Mouse position.
+
         >>> MainWindow().move_to_mouse_position()
-        True"""
+        True
+        """
         window_geometry = self.frameGeometry()
         window_geometry.moveCenter(QApplication.desktop().cursor().pos())
         return bool(not self.move(window_geometry.topLeft()))
 
     def get_half_of_resolution(self):
-        """Get half of the screen resolution.
+        """
+        Get half of the screen resolution.
+
         >>> isinstance(MainWindow().get_half_of_resolution(), tuple)
-        True"""
+        True
+        """
         mouse_pointer_position = QApplication.desktop().cursor().pos()
         screen = QApplication.desktop().screenNumber(mouse_pointer_position)
-        widt = QApplication.desktop().screenGeometry(screen).size().width() // 2
-        hei = QApplication.desktop().screenGeometry(screen).size().height() // 2
-        return (widt, hei)
+        widt = QApplication.desktop().screenGeometry(screen).size().width() / 2
+        hei = QApplication.desktop().screenGeometry(screen).size().height() / 2
+        return (int(widt), int(hei))
 
     def closeEvent(self, event):
-        ' Ask to Quit '
+        """Ask to Quit."""
         the_conditional_is_true = QMessageBox.question(
             self, __doc__.title(), 'Quit ?.', QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No) == QMessageBox.Yes
@@ -419,12 +444,16 @@ class MainWindow(QMainWindow):
 
 
 def main():
-    ' Main Loop '
+    """Main Loop."""
+    APPNAME = str(__package__ or __doc__)[:99].lower().strip().replace(" ", "")
     try:
-        from os import nice  # isort:skip
-        nice(19)  # windows has no os.nice()
-    except Exception as error:
-        print(error)
+        os.nice(19)  # smooth cpu priority
+        libc = cdll.LoadLibrary('libc.so.6')  # set process name
+        buff = create_string_buffer(len(APPNAME) + 1)
+        buff.value = bytes(APPNAME.encode("utf-8"))
+        libc.prctl(15, byref(buff), 0, 0, 0)
+    except Exception as reason:
+        print(reason)
     application = QApplication(sys.argv)
     application.setApplicationName(__doc__.strip().lower())
     application.setOrganizationName(__doc__.strip().lower())
@@ -436,18 +465,18 @@ def main():
         pass
     for o, v in opts:
         if o in ('-h', '--help'):
-            print(''' Usage:
+            print(APPNAME + ''' Usage:
                   -h, --help        Show help informations and exit.
                   -v, --version     Show version information and exit.
                   -t, --tests       Run Unit Tests on DocTests if any.''')
-            return sys.exit(1)
+            return sys.exit(0)
         elif o in ('-v', '--version'):
             print(__version__)
-            return sys.exit(1)
+            return sys.exit(0)
         elif o in ('-t', '--tests'):
             from doctest import testmod
             testmod(verbose=True, report=True, exclude_empty=True)
-            exit(1)
+            exit(0)
     mainwindow = MainWindow()
     mainwindow.show()
     sys.exit(application.exec_())
