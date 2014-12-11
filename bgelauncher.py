@@ -314,7 +314,7 @@ class MainWindow(QMainWindow):
         """Open a Game file."""
         if not os.path.isfile(game_file):
             game_file = str(QFileDialog.getOpenFileName(
-                self, __doc__ + " - Open Blender Game! ", os.path.expanduser("~"),
+                self, __doc__ + "- Open Blender Game", os.path.expanduser("~"),
                 "Blender Game Engine file (*.blend)")[0]).strip()
             if game_file and os.path.isfile(game_file):
                 return game_file
