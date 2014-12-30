@@ -21,6 +21,8 @@ import os
 import sys
 from ctypes import byref, cdll, create_string_buffer
 from getopt import getopt
+import logging as log
+from copy import copy
 from subprocess import call, check_output
 from urllib import request
 from webbrowser import open_new_tab
@@ -56,10 +58,11 @@ def get_blender_version():
     """
     try:
         ver = check_output("blender --version", shell=True).splitlines()[0]
-        ver = str(ver[2:-1]).strip().lower()
+        ver = str(ver[:-7]).strip().lower()
     except:
         ver = __doc__.strip().lower()
     finally:
+        log.info(ver)
         return ver
 
 
@@ -305,7 +308,7 @@ class MainWindow(QMainWindow):
             str(self.bpp.currentText()) if self.fullscreen.isChecked() else "",
             "-i {}".format(desktop_win_ids) if self.embeds.isChecked() else "",
             self.open_game_file(GAME_FILE))).strip()
-        print(command_to_run_blenderplayer)
+        log.debug(command_to_run_blenderplayer)
         if self.minimi.isChecked():
             self.showMinimized()
         self.process.start(command_to_run_blenderplayer)
@@ -336,7 +339,7 @@ class MainWindow(QMainWindow):
                         zipy.close()
                         return game_file.replace(".zip", ".blend")
             except Exception as e:
-                print(e)
+                log.warning(e)
 
     def _process_finished(self):
         """Finished sucessfully."""
@@ -347,7 +350,7 @@ class MainWindow(QMainWindow):
                     _log.write(self._read_output())
                     _log.write(self._read_errors())
             except Exception as e:
-                print(e)
+                log.warning(e)
 
     def _read_output(self):
         """Read and return output."""
@@ -446,6 +449,40 @@ class MainWindow(QMainWindow):
 def main():
     """Main Loop."""
     APPNAME = str(__package__ or __doc__)[:99].lower().strip().replace(" ", "")
+    if not sys.platform.startswith("win") and sys.stderr.isatty():
+        def add_color_emit_ansi(fn):
+            """Add methods we need to the class."""
+            def new(*args):
+                """Method overload."""
+                if len(args) == 2:
+                    new_args = (args[0], copy(args[1]))
+                else:
+                    new_args = (args[0], copy(args[1]), args[2:])
+                if hasattr(args[0], 'baseFilename'):
+                    return fn(*args)
+                levelno = new_args[1].levelno
+                if levelno >= 50:
+                    color = '\x1b[31m'  # red
+                elif levelno >= 40:
+                    color = '\x1b[31m'  # red
+                elif levelno >= 30:
+                    color = '\x1b[33m'  # yellow
+                elif levelno >= 20:
+                    color = '\x1b[32m'  # green
+                elif levelno >= 10:
+                    color = '\x1b[35m'  # pink
+                else:
+                    color = '\x1b[0m'  # normal
+                try:
+                    new_args[1].msg = color + str(new_args[1].msg) + '\x1b[0m'
+                except Exception as reason:
+                    print(reason)  # Do not use log here.
+                return fn(*new_args)
+            return new
+        # all non-Windows platforms support ANSI Colors so we use them
+        log.StreamHandler.emit = add_color_emit_ansi(log.StreamHandler.emit)
+    log.basicConfig(level=-1, format="%(levelname)s:%(asctime)s %(message)s")
+    log.getLogger().addHandler(log.StreamHandler(sys.stderr))
     try:
         os.nice(19)  # smooth cpu priority
         libc = cdll.LoadLibrary('libc.so.6')  # set process name
