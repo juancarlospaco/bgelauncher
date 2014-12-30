@@ -17,13 +17,14 @@ __source__ = ('https://raw.githubusercontent.com/juancarlospaco/'
 
 # imports
 import codecs
+import logging as log
 import os
 import sys
+from copy import copy
 from ctypes import byref, cdll, create_string_buffer
 from getopt import getopt
-import logging as log
-from copy import copy
 from subprocess import call, check_output
+from tempfile import gettempdir
 from urllib import request
 from webbrowser import open_new_tab
 from zipfile import ZipFile
@@ -36,7 +37,6 @@ from PyQt5.QtWidgets import (QApplication, QCheckBox, QComboBox,
                              QGridLayout, QGroupBox, QHBoxLayout, QInputDialog,
                              QLabel, QMainWindow, QMessageBox, QShortcut,
                              QSpinBox, QVBoxLayout, QWidget)
-
 
 HELP = """<h3>BGElauncher</h3><b>Blender Game Engine Launcher App !</b><br>
 Version {}, licence {}<ul><li>Python3 + Qt5, single-file, No Dependencies</ul>
@@ -481,7 +481,9 @@ def main():
             return new
         # all non-Windows platforms support ANSI Colors so we use them
         log.StreamHandler.emit = add_color_emit_ansi(log.StreamHandler.emit)
-    log.basicConfig(level=-1, format="%(levelname)s:%(asctime)s %(message)s")
+    log.basicConfig(
+        level=-1, format="%(levelname)s:%(asctime)s %(message)s", filemode="w",
+        filename=os.path.join(gettempdir(), "bge-launcher.log"))
     log.getLogger().addHandler(log.StreamHandler(sys.stderr))
     try:
         os.nice(19)  # smooth cpu priority
@@ -490,7 +492,7 @@ def main():
         buff.value = bytes(APPNAME.encode("utf-8"))
         libc.prctl(15, byref(buff), 0, 0, 0)
     except Exception as reason:
-        print(reason)
+        log.warning(reason)
     application = QApplication(sys.argv)
     application.setApplicationName(__doc__.strip().lower())
     application.setOrganizationName(__doc__.strip().lower())
