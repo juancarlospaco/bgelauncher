@@ -233,7 +233,7 @@ class MainWindow(QMainWindow):
         helpMenu.addAction("View GitHub Repo", lambda: open_new_tab(__url__))
         helpMenu.addAction("Report Bugs", lambda: open_new_tab(
             'https://github.com/juancarlospaco/bgelauncher/issues?state=open'))
-        helpMenu.addAction("Check Updates", lambda: self.check_for_updates())
+        helpMenu.addAction("Check Updates", lambda: Downloader(self))
         # process
         self.process = QProcess()
         self.process.readyReadStandardOutput.connect(self._read_output)
@@ -469,10 +469,6 @@ class MainWindow(QMainWindow):
         self.showNormal()
         self.statusBar().showMessage(" ERROR: BlenderPlayer Failed ! ")
         return str(self.process.readAllStandardError()).strip().lower()
-
-    def check_for_updates(self):
-        """Method to check for updates from Git repo versus this version."""
-        Downloader(self)
 
     def _set_guimode(self):
         """Switch between simple and full UX."""
