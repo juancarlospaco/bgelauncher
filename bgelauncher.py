@@ -66,7 +66,6 @@ class Downloader(QProgressDialog):
         """Init class."""
         super(Downloader, self).__init__(parent)
         self.setWindowTitle(__doc__)
-        self.setMinimumDuration(3000)
         self._time, self._date = time.time(), datetime.now().isoformat()[:-7]
         self._url, self._dst = __source__, __file__
         log.debug("Downloading from {} to {}.".format(self._url, self._dst))
