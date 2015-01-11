@@ -19,24 +19,34 @@ __source__ = ('https://raw.githubusercontent.com/juancarlospaco/'
 import codecs
 import logging as log
 import os
+import signal
 import sys
+import tarfile
+import time
+import zipfile
 from copy import copy
 from ctypes import byref, cdll, create_string_buffer
+from datetime import datetime
 from getopt import getopt
 from subprocess import call, check_output
 from tempfile import gettempdir
+from time import time
 from urllib import request
 from webbrowser import open_new_tab
 from zipfile import ZipFile
 
-from PyQt5.QtCore import QProcess
+from PyQt5.QtCore import (QDir, QFile, QFileInfo, QIODevice, QProcess, QSize,
+                          Qt, QTimer, QUrl)
 from PyQt5.QtGui import QIcon
-from PyQt5.QtNetwork import QNetworkProxyFactory
-from PyQt5.QtWidgets import (QApplication, QCheckBox, QComboBox,
+from PyQt5.QtNetwork import (QNetworkAccessManager, QNetworkProxyFactory,
+                             QNetworkRequest)
+from PyQt5.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog,
                              QDialogButtonBox, QFileDialog, QFontDialog,
                              QGridLayout, QGroupBox, QHBoxLayout, QInputDialog,
-                             QLabel, QMainWindow, QMessageBox, QShortcut,
-                             QSpinBox, QVBoxLayout, QWidget)
+                             QLabel, QMainWindow, QMessageBox, QProgressBar,
+                             QProgressDialog, QShortcut, QSpinBox, QVBoxLayout,
+                             QWidget)
+
 
 HELP = """<h3>BGElauncher</h3><b>Blender Game Engine Launcher App !</b><br>
 Version {}, licence {}<ul><li>Python3 + Qt5, single-file, No Dependencies</ul>
@@ -44,6 +54,97 @@ DEV: <a href=https://github.com/juancarlospaco>JuanCarlos</a>
 """.format(__version__, __license__)
 GAME_FILE = "game.blend"
 PASSWORD = ""
+
+
+###############################################################################
+
+
+class Downloader(QProgressDialog):
+
+    """Downloader Dialog with complete informations and progress bar."""
+
+    def __init__(self, parent=None):
+        """Init class."""
+        super(Downloader, self).__init__(parent)
+        self.setWindowTitle(__doc__)
+        self._time, self._date = time.time(), datetime.now().isoformat()[:-7]
+        self._url, self._dst = __source__, __file__
+        log.debug("Downloading from {} to {}.".format(self._url, self._dst))
+        if not self._url.lower().startswith("https:"):
+            log.warning("Unsecure Download over plain text without SSL.")
+        self.template = """<h3>Downloading</h3><hr><table>
+        <tr><td><b>From:</b></td>      <td>{}</td>
+        <tr><td><b>To:  </b></td>      <td>{}</td> <tr>
+        <tr><td><b>Started:</b></td>   <td>{}</td>
+        <tr><td><b>Actual:</b></td>    <td>{}</td> <tr>
+        <tr><td><b>Elapsed:</b></td>   <td>{}</td>
+        <tr><td><b>Remaining:</b></td> <td>{}</td> <tr>
+        <tr><td><b>Received:</b></td>  <td>{} MegaBytes</td>
+        <tr><td><b>Total:</b></td>     <td>{} MegaBytes</td> <tr>
+        <tr><td><b>Speed:</b></td>     <td>{}</td>
+        <tr><td><b>Percent:</b></td>     <td>{}%</td></table><hr>"""
+        self.manager = QNetworkAccessManager(self)
+        self.manager.finished.connect(self.save_downloaded_data)
+        self.manager.sslErrors.connect(self.download_failed)
+        self.progreso = self.manager.get(QNetworkRequest(QUrl(self._url)))
+        self.progreso.downloadProgress.connect(self.update_download_progress)
+        self.show()
+        self.exec_()
+
+    def save_downloaded_data(self, data):
+        """Save all downloaded data to the disk and quit."""
+        log.debug("Download done. Update Done.")
+        with open(os.path.join(self._dst), "wb") as output_file:
+            output_file.write(data.readAll())
+        data.close()
+        del self.manager, data
+        return self.close()
+
+    def download_failed(self, download_error):
+        """Handle a download error, probable SSL errors."""
+        log.error(download_error)
+        QMessageBox.error(self, __doc__.title(), str(download_error))
+
+    def seconds_time_to_human_string(self, time_on_seconds=0):
+        """Calculate time, with precision from seconds to days."""
+        minutes, seconds = divmod(int(time_on_seconds), 60)
+        hours, minutes = divmod(minutes, 60)
+        days, hours = divmod(hours, 24)
+        human_time_string = ""
+        if days:
+            human_time_string += "%02d Days " % days
+        if hours:
+            human_time_string += "%02d Hours " % hours
+        if minutes:
+            human_time_string += "%02d Minutes " % minutes
+        human_time_string += "%02d Seconds" % seconds
+        return human_time_string
+
+    def update_download_progress(self, bytesReceived, bytesTotal):
+        """Calculate statistics and update the UI with them."""
+        downloaded_MB = round(((bytesReceived / 1024) / 1024), 2)
+        total_data_MB = round(((bytesTotal / 1024) / 1024), 2)
+        downloaded_KB, total_data_KB = bytesReceived / 1024, bytesTotal / 1024
+        # Calculate download speed values, with precision from Kb/s to Gb/s
+        elapsed = time.clock()
+        if elapsed > 0:
+            speed = round((downloaded_KB / elapsed), 2)
+            if speed > 1024000:  # Gigabyte speeds
+                download_speed = "{} GigaByte/Second".format(speed // 1024000)
+            if speed > 1024:  # MegaByte speeds
+                download_speed = "{} MegaBytes/Second".format(speed // 1024)
+            else:  # KiloByte speeds
+                download_speed = "{} KiloBytes/Second".format(int(speed))
+        if speed > 0:
+            missing = abs((total_data_KB - downloaded_KB) // speed)
+        percentage = int(100.0 * bytesReceived // bytesTotal)
+        self.setLabelText(self.template.format(
+            self._url.lower()[:99], self._dst.lower()[:99],
+            self._date, datetime.now().isoformat()[:-7],
+            self.seconds_time_to_human_string(time.time() - self._time),
+            self.seconds_time_to_human_string(missing),
+            downloaded_MB, total_data_MB, download_speed, percentage))
+        self.setValue(percentage)
 
 
 ###############################################################################
@@ -371,10 +472,13 @@ class MainWindow(QMainWindow):
         this_version = str(open(__file__).read())
         last_version = str(request.urlopen(__source__).read().decode("utf8"))
         if this_version != last_version:
-            m = "Theres new Version available<br>Download update from the web"
+            m = "Theres new Version available<br>Updating from the web..."
+            QMessageBox.information(self, __doc__.title(), "<b>" + m)
+            Downloader(self)
         else:
             m = "No new updates!<br>You have the lastest version of this app"
-        return QMessageBox.information(self, __doc__.title(), "<b>" + m)
+            QMessageBox.information(self, __doc__.title(), "<b>" + m)
+            return
 
     def _set_guimode(self):
         """Switch between simple and full UX."""
@@ -493,6 +597,7 @@ def main():
         libc.prctl(15, byref(buff), 0, 0, 0)
     except Exception as reason:
         log.warning(reason)
+    signal.signal(signal.SIGINT, signal.SIG_DFL)  # CTRL+C work to quit app
     application = QApplication(sys.argv)
     application.setApplicationName(__doc__.strip().lower())
     application.setOrganizationName(__doc__.strip().lower())
