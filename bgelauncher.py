@@ -68,8 +68,6 @@ class Downloader(QProgressDialog):
         self.setWindowTitle(__doc__)
         if not os.path.isfile(__file__) or not __source__:
             self.close()
-        QMessageBox.information(self, __doc__.title(),
-                                "<b>Checking for Updates, may take some time")
         self._time, self._date = time.time(), datetime.now().isoformat()[:-7]
         self._url, self._dst = __source__, __file__
         log.debug("Downloading from {} to {}.".format(self._url, self._dst))
