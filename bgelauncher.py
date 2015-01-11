@@ -30,7 +30,6 @@ from datetime import datetime
 from getopt import getopt
 from subprocess import call, check_output
 from tempfile import gettempdir
-from time import time
 from urllib import request
 from webbrowser import open_new_tab
 from zipfile import ZipFile
@@ -67,6 +66,7 @@ class Downloader(QProgressDialog):
         """Init class."""
         super(Downloader, self).__init__(parent)
         self.setWindowTitle(__doc__)
+        self.setMinimumDuration(3000)
         self._time, self._date = time.time(), datetime.now().isoformat()[:-7]
         self._url, self._dst = __source__, __file__
         log.debug("Downloading from {} to {}.".format(self._url, self._dst))
@@ -471,6 +471,16 @@ class MainWindow(QMainWindow):
         """Method to check for updates from Git repo versus this version."""
         this_version = str(open(__file__).read())
         last_version = str(request.urlopen(__source__).read().decode("utf8"))
+
+
+
+
+
+
+
+
+
+        # fkhsdklfjsdkljfklsdjfklsdjfklsdjklsdjfklsdjklfjsdklsdj
         if this_version != last_version:
             m = "Theres new Version available<br>Updating from the web..."
             QMessageBox.information(self, __doc__.title(), "<b>" + m)
