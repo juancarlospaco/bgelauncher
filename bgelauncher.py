@@ -468,26 +468,13 @@ class MainWindow(QMainWindow):
 
     def check_for_updates(self):
         """Method to check for updates from Git repo versus this version."""
-        this_version = str(open(__file__).read())
-        last_version = str(request.urlopen(__source__).read().decode("utf8"))
-
-
-
-
-
-
-
-
-
-        # fkhsdklfjsdkljfklsdjfklsdjfklsdjklsdjfklsdjklfjsdklsdj
-        if this_version != last_version:
-            m = "Theres new Version available<br>Updating from the web..."
-            QMessageBox.information(self, __doc__.title(), "<b>" + m)
-            Downloader(self)
-        else:
-            m = "No new updates!<br>You have the lastest version of this app"
-            QMessageBox.information(self, __doc__.title(), "<b>" + m)
+        if not os.path.isfile(__file__) or not __source__:
             return
+        QMessageBox.information(self, __doc__.title(),
+                                "<b>Checking for Updates, may take some time")
+        Downloader(self)
+        QMessageBox.information(self, __doc__.title(),
+                                "<b>You got the latest version of this App!")
 
     def _set_guimode(self):
         """Switch between simple and full UX."""
