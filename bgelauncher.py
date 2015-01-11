@@ -66,6 +66,10 @@ class Downloader(QProgressDialog):
         """Init class."""
         super(Downloader, self).__init__(parent)
         self.setWindowTitle(__doc__)
+        if not os.path.isfile(__file__) or not __source__:
+            self.close()
+        QMessageBox.information(self, __doc__.title(),
+                                "<b>Checking for Updates, may take some time")
         self._time, self._date = time.time(), datetime.now().isoformat()[:-7]
         self._url, self._dst = __source__, __file__
         log.debug("Downloading from {} to {}.".format(self._url, self._dst))
@@ -96,6 +100,8 @@ class Downloader(QProgressDialog):
         with open(os.path.join(self._dst), "wb") as output_file:
             output_file.write(data.readAll())
         data.close()
+        QMessageBox.information(self, __doc__.title(),
+                                "<b>You got the latest version of this App!")
         del self.manager, data
         return self.close()
 
@@ -468,13 +474,7 @@ class MainWindow(QMainWindow):
 
     def check_for_updates(self):
         """Method to check for updates from Git repo versus this version."""
-        if not os.path.isfile(__file__) or not __source__:
-            return
-        QMessageBox.information(self, __doc__.title(),
-                                "<b>Checking for Updates, may take some time")
         Downloader(self)
-        QMessageBox.information(self, __doc__.title(),
-                                "<b>You got the latest version of this App!")
 
     def _set_guimode(self):
         """Switch between simple and full UX."""
