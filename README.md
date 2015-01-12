@@ -8,6 +8,7 @@ bgelauncher
 - Python 3 + Qt 5, single-file, easy use, compilable with Nuitka, GPLv3+ and LGPLv3+ Licences.
 - Pretty Colors for Logs and Standard Output and Log File on Temporary Folder.
 - Set its own Process name and show up on Process lists.
+- Updater Async Downloader with full Unicode support and download info.
 - 2 UX modes, Simple *(ala Elementary)* or Full *(ala KDE)*
 
 
